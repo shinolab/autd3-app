@@ -3,32 +3,74 @@ import 'package:flutter/material.dart';
 import 'package:autd3/autd3.dart';
 import '../../settings.dart';
 
-class StaticPage extends StatefulWidget {
-  const StaticPage(
+class PlanePage extends StatefulWidget {
+  const PlanePage(
       {super.key, required this.controller, required this.settings});
 
   final Controller controller;
   final Settings settings;
 
   @override
-  State<StaticPage> createState() => _StaticPageState();
+  State<PlanePage> createState() => _PlanePageState();
 }
 
-class _StaticPageState extends State<StaticPage> {
+class _PlanePageState extends State<PlanePage> {
   bool isSending = false;
 
+  double nx = 0.0;
+  double ny = 0.0;
+  double nz = 1.0;
   int intensity = 255;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Static'),
+        title: const Text('Plane'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            Text('nx: $nx'),
+            Slider(
+              value: nx,
+              min: 0,
+              max: 1,
+              divisions: 100,
+              label: nx.toString(),
+              onChanged: (value) {
+                setState(() {
+                  nx = value;
+                });
+              },
+            ),
+            Text('ny: $ny'),
+            Slider(
+              value: ny,
+              min: 0,
+              max: 1,
+              divisions: 100,
+              label: ny.toString(),
+              onChanged: (value) {
+                setState(() {
+                  ny = value;
+                });
+              },
+            ),
+            Text('nz: $nz'),
+            Slider(
+              value: nz,
+              min: 0,
+              max: 1,
+              divisions: 100,
+              label: nz.toString(),
+              onChanged: (value) {
+                setState(() {
+                  nz = value;
+                });
+              },
+            ),
             Text('intensity: $intensity'),
             Slider(
               value: intensity.toDouble(),
@@ -53,7 +95,10 @@ class _StaticPageState extends State<StaticPage> {
                   isSending = true;
                 });
                 try {
-                  await widget.controller.send(Static.withIntensity(intensity));
+                  await widget.controller.send(Plane(
+                    Vector3(nx, ny, nz),
+                    intensity: EmitIntensity(intensity),
+                  ));
                 } catch (e) {
                   if (!context.mounted) {
                     return;
@@ -69,11 +114,9 @@ class _StaticPageState extends State<StaticPage> {
                     ),
                   );
                 }
-                {
-                  setState(() {
-                    isSending = false;
-                  });
-                }
+                setState(() {
+                  isSending = false;
+                });
               },
         child: isSending
             ? Container(

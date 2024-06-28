@@ -186,12 +186,28 @@ class _BesselPageState extends State<BesselPage> {
                 setState(() {
                   isSending = true;
                 });
-                await widget.controller.send(Bessel(
-                  Vector3(x, y, z),
-                  Vector3(nx, ny, nz),
-                  theta.deg,
-                  intensity: EmitIntensity(intensity),
-                ));
+                try {
+                  await widget.controller.send(Bessel(
+                    Vector3(x, y, z),
+                    Vector3(nx, ny, nz),
+                    theta.deg,
+                    intensity: EmitIntensity(intensity),
+                  ));
+                } catch (e) {
+                  if (!context.mounted) {
+                    return;
+                  }
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(e.toString(),
+                          style: const TextStyle(color: Colors.white)),
+                      backgroundColor: Colors.redAccent.withOpacity(0.8),
+                      behavior: SnackBarBehavior.floating,
+                      elevation: 4.0,
+                      dismissDirection: DismissDirection.horizontal,
+                    ),
+                  );
+                }
                 setState(() {
                   isSending = false;
                 });

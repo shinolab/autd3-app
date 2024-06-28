@@ -66,9 +66,24 @@ class _PageState extends State<SilentPage> {
                 setState(() {
                   isSending = true;
                 });
-                widget.controller
-                    .send(Silencer.fromCompletionSteps(intensity, phase))
-                    .then;
+                try {
+                  await widget.controller
+                      .send(Silencer.fromCompletionSteps(intensity, phase));
+                } catch (e) {
+                  if (!context.mounted) {
+                    return;
+                  }
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(e.toString(),
+                          style: const TextStyle(color: Colors.white)),
+                      backgroundColor: Colors.redAccent.withOpacity(0.8),
+                      behavior: SnackBarBehavior.floating,
+                      elevation: 4.0,
+                      dismissDirection: DismissDirection.horizontal,
+                    ),
+                  );
+                }
                 setState(() {
                   isSending = false;
                 });

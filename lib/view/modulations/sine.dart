@@ -79,11 +79,27 @@ class _SinePageState extends State<SinePage> {
                 setState(() {
                   isSending = true;
                 });
-                await widget.controller.send(Sine.create(
-                  freq.Hz,
-                  intensity: intensity,
-                  offset: offset,
-                ));
+                try {
+                  await widget.controller.send(Sine.create(
+                    freq.Hz,
+                    intensity: intensity,
+                    offset: offset,
+                  ));
+                } catch (e) {
+                  if (!context.mounted) {
+                    return;
+                  }
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(e.toString(),
+                          style: const TextStyle(color: Colors.white)),
+                      backgroundColor: Colors.redAccent.withOpacity(0.8),
+                      behavior: SnackBarBehavior.floating,
+                      elevation: 4.0,
+                      dismissDirection: DismissDirection.horizontal,
+                    ),
+                  );
+                }
                 setState(() {
                   isSending = false;
                 });

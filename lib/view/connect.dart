@@ -17,8 +17,7 @@ class _ConnectPageState extends State<ConnectPage> {
       r'^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])$');
 
   bool loading = true;
-  String _ipAddress = '';
-  bool _isValudIp = false;
+  bool _isValidIp = false;
 
   Settings settings = Settings();
 
@@ -29,8 +28,7 @@ class _ConnectPageState extends State<ConnectPage> {
       await settings.load('settings.json');
       setState(() {
         loading = false;
-        _ipAddress = settings.ip;
-        _isValudIp = _ipv4Reg.hasMatch(_ipAddress);
+        _isValidIp = _ipv4Reg.hasMatch(settings.ip);
       });
     });
   }
@@ -46,27 +44,27 @@ class _ConnectPageState extends State<ConnectPage> {
               title: Text(widget.title),
             ),
             body: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Focus(
                     child: TextField(
-                      controller: TextEditingController(text: _ipAddress),
+                      controller: TextEditingController(text: settings.ip),
                       decoration: const InputDecoration(
-                        labelText: 'Input IP Address of server',
+                        labelText: 'IP Address of lightweight server',
                         hintText: 'xxx.xxx.xxx.xxx',
                       ),
                       keyboardType: TextInputType.number,
                       onChanged: (value) {
-                        _ipAddress = value;
+                        settings.ip = value;
                       },
                       maxLength: 15,
                     ),
                     onFocusChange: (value) {
                       if (!value) {
                         setState(() {
-                          _isValudIp = _ipv4Reg.hasMatch(_ipAddress);
+                          _isValidIp = _ipv4Reg.hasMatch(settings.ip);
                         });
                       }
                     },
@@ -74,35 +72,41 @@ class _ConnectPageState extends State<ConnectPage> {
                   const SizedBox(
                     height: 10,
                   ),
-                  FilledButton(
-                    onPressed: _isValudIp
-                        ? () async {
-                            final value = await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => GeometryPage(
-                                    ipAddress: _ipAddress,
-                                    settings: settings,
-                                  ),
-                                ));
-                            if (value is Exception) {
-                              if (!context.mounted) {
-                                return;
-                              }
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  backgroundColor:
-                                      Colors.redAccent.withOpacity(0.8),
-                                  content: Text('$value'),
-                                ),
-                              );
-                            }
-                          }
-                        : null,
-                    child: const Text('Connect'),
+                  Focus(
+                    child: TextField(
+                      controller:
+                          TextEditingController(text: '${settings.port}'),
+                      decoration: const InputDecoration(
+                        labelText: 'Port of lightweight server',
+                        hintText: '8080',
+                      ),
+                      keyboardType: TextInputType.number,
+                      onChanged: (value) {
+                        settings.port = int.tryParse(value) ?? 8080;
+                      },
+                    ),
                   ),
                 ],
               ),
-            ));
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: _isValidIp
+                  ? () async {
+                      await settings.save('settings.json');
+                      if (!context.mounted) {
+                        return;
+                      }
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => GeometryPage(
+                              settings: settings,
+                            ),
+                          ));
+                    }
+                  : null,
+              child: const Icon(Icons.navigate_next),
+            ),
+          );
   }
 }

@@ -30,10 +30,10 @@ packages:
     description:
       path: "."
       ref: develop
-      resolved-ref: f3fbd9803e43c4049184e5e87ca2f1eb11a35af6
+      resolved-ref: "6b0dade5fff6f59007f1a68e68544b58a325817e"
       url: "https://github.com/shinolab/autd3-dart.git"
     source: git
-    version: "26.0.0-beta.2"
+    version: "26.0.0-rc.0"
   boolean_selector:
     dependency: transitive
     description:
@@ -204,14 +204,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
-  loading_animation_widget:
-    dependency: "direct main"
-    description:
-      name: loading_animation_widget
-      sha256: ee3659035528d19145d50cf0107632bf647e7306c88b6a32f35f3bed63f6d728
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.2.1"
   matcher:
     dependency: transitive
     description:

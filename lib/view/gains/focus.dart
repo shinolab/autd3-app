@@ -120,10 +120,26 @@ class _FocusPageState extends State<FocusPage> {
                 setState(() {
                   isSending = true;
                 });
-                await widget.controller.send(autd3.Focus(
-                  autd3.Vector3(x, y, z),
-                  intensity: EmitIntensity(intensity),
-                ));
+                try {
+                  await widget.controller.send(autd3.Focus(
+                    autd3.Vector3(x, y, z),
+                    intensity: EmitIntensity(intensity),
+                  ));
+                } catch (e) {
+                  if (!context.mounted) {
+                    return;
+                  }
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(e.toString(),
+                          style: const TextStyle(color: Colors.white)),
+                      backgroundColor: Colors.redAccent.withOpacity(0.8),
+                      behavior: SnackBarBehavior.floating,
+                      elevation: 4.0,
+                      dismissDirection: DismissDirection.horizontal,
+                    ),
+                  );
+                }
                 setState(() {
                   isSending = false;
                 });

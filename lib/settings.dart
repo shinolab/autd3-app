@@ -41,16 +41,19 @@ class Settings {
   Settings();
 
   String ip = '';
+  int port = 8080;
   List<Geometry> geometry = [];
 
   fromJson(Map<String, dynamic> json) {
     ip = json['ip'];
+    port = json['port'];
     geometry = List<Geometry>.from(
         json['geometries'].map((geometry) => Geometry.fromJson(geometry)));
   }
 
   Map<String, dynamic> toJson() => {
         'ip': ip,
+        'port': port,
         'geometries': geometry,
       };
 
@@ -80,6 +83,7 @@ class Settings {
 
   _setDefault() {
     ip = '';
+    port = 8080;
     geometry = [];
   }
 }

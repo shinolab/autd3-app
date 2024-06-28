@@ -3,47 +3,24 @@ import 'package:flutter/material.dart';
 import 'package:autd3/autd3.dart';
 import '../../settings.dart';
 
-class StaticPage extends StatefulWidget {
-  const StaticPage(
-      {super.key, required this.controller, required this.settings});
+class NullPage extends StatefulWidget {
+  const NullPage({super.key, required this.controller, required this.settings});
 
   final Controller controller;
   final Settings settings;
 
   @override
-  State<StaticPage> createState() => _StaticPageState();
+  State<NullPage> createState() => _NullPageState();
 }
 
-class _StaticPageState extends State<StaticPage> {
+class _NullPageState extends State<NullPage> {
   bool isSending = false;
-
-  int intensity = 255;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Static'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text('intensity: $intensity'),
-            Slider(
-              value: intensity.toDouble(),
-              min: 0,
-              max: 255,
-              divisions: 256,
-              label: intensity.toString(),
-              onChanged: (value) {
-                setState(() {
-                  intensity = value.toInt();
-                });
-              },
-            ),
-          ],
-        ),
+        title: const Text('Null'),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: isSending
@@ -53,7 +30,7 @@ class _StaticPageState extends State<StaticPage> {
                   isSending = true;
                 });
                 try {
-                  await widget.controller.send(Static.withIntensity(intensity));
+                  await widget.controller.send(Null());
                 } catch (e) {
                   if (!context.mounted) {
                     return;
@@ -69,11 +46,9 @@ class _StaticPageState extends State<StaticPage> {
                     ),
                   );
                 }
-                {
-                  setState(() {
-                    isSending = false;
-                  });
-                }
+                setState(() {
+                  isSending = false;
+                });
               },
         child: isSending
             ? Container(

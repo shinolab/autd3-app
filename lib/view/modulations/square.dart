@@ -3,42 +3,84 @@ import 'package:flutter/material.dart';
 import 'package:autd3/autd3.dart';
 import '../../settings.dart';
 
-class StaticPage extends StatefulWidget {
-  const StaticPage(
+class SquarePage extends StatefulWidget {
+  const SquarePage(
       {super.key, required this.controller, required this.settings});
 
   final Controller controller;
   final Settings settings;
 
   @override
-  State<StaticPage> createState() => _StaticPageState();
+  State<SquarePage> createState() => _SquarePageState();
 }
 
-class _StaticPageState extends State<StaticPage> {
+class _SquarePageState extends State<SquarePage> {
   bool isSending = false;
 
-  int intensity = 255;
+  int freq = 150;
+  int low = 0;
+  int high = 255;
+  double duty = 0.5;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Static'),
+        title: const Text('Square'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text('intensity: $intensity'),
+            Text('freq: $freq'),
             Slider(
-              value: intensity.toDouble(),
+              value: freq.toDouble(),
+              min: 0,
+              max: 2000,
+              divisions: 2000,
+              label: freq.toString(),
+              onChanged: (value) {
+                setState(() {
+                  freq = value.toInt();
+                });
+              },
+            ),
+            Text('low: $low'),
+            Slider(
+              value: low.toDouble(),
               min: 0,
               max: 255,
               divisions: 256,
-              label: intensity.toString(),
+              label: low.toString(),
               onChanged: (value) {
                 setState(() {
-                  intensity = value.toInt();
+                  low = value.toInt();
+                });
+              },
+            ),
+            Text('high: $high'),
+            Slider(
+              value: high.toDouble(),
+              min: 0,
+              max: 256,
+              divisions: 256,
+              label: high.toString(),
+              onChanged: (value) {
+                setState(() {
+                  high = value.toInt();
+                });
+              },
+            ),
+            Text('duty: $duty'),
+            Slider(
+              value: duty,
+              min: 0,
+              max: 1,
+              divisions: 100,
+              label: duty.toString(),
+              onChanged: (value) {
+                setState(() {
+                  duty = value;
                 });
               },
             ),
@@ -53,7 +95,12 @@ class _StaticPageState extends State<StaticPage> {
                   isSending = true;
                 });
                 try {
-                  await widget.controller.send(Static.withIntensity(intensity));
+                  await widget.controller.send(Square.create(
+                    freq.Hz,
+                    low: low,
+                    high: high,
+                    duty: duty,
+                  ));
                 } catch (e) {
                   if (!context.mounted) {
                     return;
@@ -69,11 +116,9 @@ class _StaticPageState extends State<StaticPage> {
                     ),
                   );
                 }
-                {
-                  setState(() {
-                    isSending = false;
-                  });
-                }
+                setState(() {
+                  isSending = false;
+                });
               },
         child: isSending
             ? Container(

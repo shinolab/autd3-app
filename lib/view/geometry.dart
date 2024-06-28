@@ -1,15 +1,16 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:autd3/autd3.dart';
+import 'package:grpc/grpc.dart';
 
 import '../settings.dart';
 import 'app.dart';
 
 class GeometryPage extends StatefulWidget {
-  const GeometryPage(
-      {super.key, required this.ipAddress, required this.settings});
+  const GeometryPage({super.key, required this.settings});
 
-  final String ipAddress;
   final Settings settings;
 
   @override
@@ -17,13 +18,11 @@ class GeometryPage extends StatefulWidget {
 }
 
 class _GeometryPageState extends State<GeometryPage> {
+  bool _connecting = false;
+
   @override
   void initState() {
     super.initState();
-    widget.settings.ip = widget.ipAddress;
-    Future(() async {
-      await widget.settings.save('settings.json');
-    });
   }
 
   @override
@@ -33,60 +32,144 @@ class _GeometryPageState extends State<GeometryPage> {
         appBar: AppBar(
           title: const Text('Geometry configuration'),
         ),
-        body: Column(children: <Widget>[
-          const SizedBox(height: 16),
-          ListView.builder(
-            itemBuilder: (BuildContext context, int index) {
-              final geometry = widget.settings.geometry[index];
-              return Dismissible(
-                key: ValueKey<Geometry>(geometry),
-                onDismissed: (direction) {
+        body: Container(
+            padding: const EdgeInsets.all(16),
+            child: Column(children: <Widget>[
+              const SizedBox(height: 16),
+              ReorderableListView.builder(
+                onReorder: (int oldIndex, int newIndex) {
                   setState(() {
-                    widget.settings.geometry.removeAt(index);
+                    if (oldIndex < newIndex) {
+                      newIndex -= 1;
+                    }
+                    final Geometry item =
+                        widget.settings.geometry.removeAt(oldIndex);
+                    widget.settings.geometry.insert(newIndex, item);
                   });
                 },
-                child: GeometryCard(
-                  index: index,
-                  geometry: geometry,
-                ),
-              );
-            },
-            shrinkWrap: true,
-            itemCount: widget.settings.geometry.length,
-          ),
-          const SizedBox(height: 16),
-          FilledButton(
-              onPressed: () async {
-                final value = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const _GeometryAddPage()),
-                );
-                if (value != null) {
-                  setState(() {
-                    widget.settings.geometry.add(value);
-                  });
-                }
-              },
-              child: const Icon(Icons.add))
-        ]),
-        floatingActionButton: FloatingActionButton(
-          onPressed: widget.settings.geometry.isEmpty
-              ? null
-              : () {
-                  final completer = Completer();
-                  final result = Navigator.pushReplacement(
+                itemBuilder: (BuildContext context, int index) {
+                  final geometry = widget.settings.geometry[index];
+                  return InkWell(
+                      key: Key('$index'),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => _GeometryConfigPage(
+                                    geometry,
+                                    'Edit',
+                                    true,
+                                  )),
+                        ).then((value) {
+                          if (value != null) {
+                            setState(() {
+                              widget.settings.geometry[index] = value;
+                            });
+                          } else {
+                            setState(() {
+                              widget.settings.geometry.removeAt(index);
+                            });
+                          }
+                        });
+                      },
+                      child: Dismissible(
+                        key: ValueKey<Geometry>(geometry),
+                        onDismissed: (direction) {
+                          setState(() {
+                            widget.settings.geometry.removeAt(index);
+                          });
+                        },
+                        child: GeometryCard(
+                          index: index,
+                          geometry: geometry,
+                        ),
+                      ));
+                },
+                shrinkWrap: true,
+                itemCount: widget.settings.geometry.length,
+              ),
+              const SizedBox(height: 16),
+              FilledButton(
+                  onPressed: () async {
+                    final value = await Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => AppPage(
-                          settings: widget.settings,
-                          ipAddress: widget.ipAddress,
+                          builder: (context) => _GeometryConfigPage(
+                                Geometry(
+                                    x: 0, y: 0, z: 0, ry: 0, rz1: 0, rz2: 0),
+                                'Add',
+                                false,
+                              )),
+                    );
+                    if (value != null) {
+                      setState(() {
+                        widget.settings.geometry.add(value);
+                      });
+                    }
+                  },
+                  child: const Icon(Icons.add))
+            ])),
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: widget.settings.geometry.isEmpty || _connecting
+              ? Theme.of(context).disabledColor
+              : Theme.of(context).floatingActionButtonTheme.backgroundColor,
+          onPressed: widget.settings.geometry.isEmpty || _connecting
+              ? null
+              : () async {
+                  setState(() {
+                    _connecting = true;
+                  });
+                  await widget.settings.save('settings.json');
+                  Controller.builder(widget.settings.geometry.map((d) => AUTD3(
+                          Vector3(d.x, d.y, d.z),
+                          rot: Quaternion.axisAngle(
+                                  Vector3(0, 0, 1), d.rz1 / 180 * pi) *
+                              Quaternion.axisAngle(
+                                  Vector3(0, 1, 0), d.ry / 180 * pi) *
+                              Quaternion.axisAngle(
+                                  Vector3(0, 0, 1), d.rz2 / 180 * pi))))
+                      .open(ClientChannel(
+                    widget.settings.ip,
+                    port: widget.settings.port,
+                    options: const ChannelOptions(
+                      credentials: ChannelCredentials.insecure(),
+                      connectTimeout: Duration(seconds: 10),
+                    ),
+                  ))
+                      .then((controller) {
+                    final completer = Completer();
+                    final result = Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AppPage(
+                            settings: widget.settings,
+                            controller: controller,
+                          ),
                         ),
+                        result: completer.future);
+                    completer.complete(result);
+                  }).catchError((e) {
+                    setState(() {
+                      _connecting = false;
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Failed to connect to the server: $e',
+                            style: const TextStyle(color: Colors.white)),
+                        backgroundColor: Colors.redAccent.withOpacity(0.8),
+                        duration: const Duration(days: 365),
+                        behavior: SnackBarBehavior.floating,
+                        elevation: 4.0,
+                        closeIconColor: Colors.white,
+                        showCloseIcon: true,
+                        dismissDirection: DismissDirection.horizontal,
                       ),
-                      result: completer.future);
-                  completer.complete(result);
+                    );
+                  });
                 },
-          child: const Icon(Icons.navigate_next),
+          child: _connecting
+              ? const CircularProgressIndicator()
+              : const Icon(Icons.navigate_next),
         ),
       ),
     );
@@ -111,23 +194,33 @@ class GeometryCard extends StatelessWidget {
   }
 }
 
-class _GeometryAddPage extends StatefulWidget {
-  const _GeometryAddPage();
+class _GeometryConfigPage extends StatefulWidget {
+  const _GeometryConfigPage(this.geometry, this.title, this.isEditMode);
+
+  final Geometry geometry;
+  final String title;
+  final bool isEditMode;
 
   @override
-  State<_GeometryAddPage> createState() => _GeometryAddPageState();
+  State<_GeometryConfigPage> createState() => _GeometryConfigPageState();
 }
 
-class _GeometryAddPageState extends State<_GeometryAddPage> {
-  _GeometryAddPageState();
+class _GeometryConfigPageState extends State<_GeometryConfigPage> {
+  _GeometryConfigPageState();
 
   Geometry geometry = Geometry(x: 0, y: 0, z: 0, ry: 0, rz1: 0, rz2: 0);
+
+  @override
+  void initState() {
+    super.initState();
+    geometry = widget.geometry;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add device'),
+        title: Text(widget.title),
       ),
       body: Container(
         padding: const EdgeInsets.all(64),
@@ -161,9 +254,7 @@ class _GeometryAddPageState extends State<_GeometryAddPage> {
                     controller:
                         TextEditingController(text: geometry.x.toString()),
                     onChanged: (value) {
-                      setState(() {
-                        geometry.x = double.tryParse(value) ?? 0;
-                      });
+                      geometry.x = double.tryParse(value) ?? 0;
                     },
                   ),
                 ),
@@ -193,9 +284,7 @@ class _GeometryAddPageState extends State<_GeometryAddPage> {
                     controller:
                         TextEditingController(text: geometry.y.toString()),
                     onChanged: (value) {
-                      setState(() {
-                        geometry.y = double.tryParse(value) ?? 0;
-                      });
+                      geometry.y = double.tryParse(value) ?? 0;
                     },
                   ),
                 ),
@@ -225,9 +314,7 @@ class _GeometryAddPageState extends State<_GeometryAddPage> {
                     controller:
                         TextEditingController(text: geometry.z.toString()),
                     onChanged: (value) {
-                      setState(() {
-                        geometry.z = double.tryParse(value) ?? 0;
-                      });
+                      geometry.z = double.tryParse(value) ?? 0;
                     },
                   ),
                 ),
@@ -275,9 +362,7 @@ class _GeometryAddPageState extends State<_GeometryAddPage> {
                     controller:
                         TextEditingController(text: geometry.rz1.toString()),
                     onChanged: (value) {
-                      setState(() {
-                        geometry.rz1 = double.tryParse(value) ?? 0;
-                      });
+                      geometry.rz1 = double.tryParse(value) ?? 0;
                     },
                   ),
                 ),
@@ -299,9 +384,7 @@ class _GeometryAddPageState extends State<_GeometryAddPage> {
                     controller:
                         TextEditingController(text: geometry.ry.toString()),
                     onChanged: (value) {
-                      setState(() {
-                        geometry.ry = double.tryParse(value) ?? 0;
-                      });
+                      geometry.ry = double.tryParse(value) ?? 0;
                     },
                   ),
                 ),
@@ -323,9 +406,7 @@ class _GeometryAddPageState extends State<_GeometryAddPage> {
                     controller:
                         TextEditingController(text: geometry.rz2.toString()),
                     onChanged: (value) {
-                      setState(() {
-                        geometry.rz2 = double.tryParse(value) ?? 0;
-                      });
+                      geometry.rz2 = double.tryParse(value) ?? 0;
                     },
                   ),
                 ),
@@ -345,7 +426,9 @@ class _GeometryAddPageState extends State<_GeometryAddPage> {
                 onPressed: () {
                   Navigator.of(context).pop(geometry);
                 },
-                child: const Text('Add'),
+                child: widget.isEditMode
+                    ? const Text('Update')
+                    : const Text('Add'),
               ),
             ),
             const SizedBox(height: 8),
@@ -353,9 +436,11 @@ class _GeometryAddPageState extends State<_GeometryAddPage> {
               width: double.infinity,
               child: TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  Navigator.of(context).pop(null);
                 },
-                child: const Text('Cancel'),
+                child: widget.isEditMode
+                    ? const Text('Remove')
+                    : const Text('Cancel'),
               ),
             ),
           ],
