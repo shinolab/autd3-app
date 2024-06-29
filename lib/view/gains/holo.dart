@@ -34,22 +34,27 @@ class _HoloPageState extends State<HoloPage> {
           child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                const Text("Algorithm"),
-                DropdownButton<HoloType>(
-                    alignment: Alignment.topRight,
-                    value: selectedAlgorighm,
-                    onChanged: (HoloType? newValue) {
-                      setState(() {
-                        selectedAlgorighm = newValue ?? HoloType.GSPAT;
-                      });
-                    },
-                    items: HoloType.values.map((HoloType classType) {
-                      return DropdownMenuItem<HoloType>(
-                          value: classType,
-                          child: Text(classType
-                              .toString()
-                              .replaceFirst("HoloType.", "")));
-                    }).toList()),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    const Text("Algorithm: "),
+                    DropdownButton<HoloType>(
+                        alignment: Alignment.topRight,
+                        value: selectedAlgorighm,
+                        onChanged: (HoloType? newValue) {
+                          setState(() {
+                            selectedAlgorighm = newValue ?? HoloType.GSPAT;
+                          });
+                        },
+                        items: HoloType.values.map((HoloType classType) {
+                          return DropdownMenuItem<HoloType>(
+                              value: classType,
+                              child: Text(classType
+                                  .toString()
+                                  .replaceFirst("HoloType.", "")));
+                        }).toList())
+                  ],
+                ),
                 const SizedBox(height: 16),
                 const Text("Foci"),
                 Center(
@@ -65,12 +70,19 @@ class _HoloPageState extends State<HoloPage> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
-                                          _HoloAddPage(focus)),
+                                          _HoloAddPage(focus, "Edit", true)),
                                 ).then((value) {
                                   if (value != null) {
-                                    setState(() {
-                                      _foci[index] = value;
-                                    });
+                                    final (h, update) = value;
+                                    if (update) {
+                                      setState(() {
+                                        _foci[index] = h;
+                                      });
+                                    } else {
+                                      setState(() {
+                                        _foci.removeAt(index);
+                                      });
+                                    }
                                   }
                                 });
                               },
@@ -96,12 +108,16 @@ class _HoloPageState extends State<HoloPage> {
                             final value = await Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => _HoloAddPage(lastFoci)),
+                                  builder: (context) =>
+                                      _HoloAddPage(lastFoci, "Add", false)),
                             );
                             if (value != null) {
-                              setState(() {
-                                _foci.add(value);
-                              });
+                              final (h, isUpdate) = value;
+                              if (isUpdate) {
+                                setState(() {
+                                  _foci.add(h);
+                                });
+                              }
                             }
                           },
                           child: const Icon(Icons.add))
@@ -184,9 +200,11 @@ class HoloCard extends StatelessWidget {
 }
 
 class _HoloAddPage extends StatefulWidget {
-  const _HoloAddPage(this.focus);
+  const _HoloAddPage(this.focus, this.title, this.isEditMode);
 
   final Holo focus;
+  final String title;
+  final bool isEditMode;
 
   @override
   State<_HoloAddPage> createState() => _HoloAddPageState();
@@ -213,7 +231,7 @@ class _HoloAddPageState extends State<_HoloAddPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add focus'),
+        title: Text(widget.title),
       ),
       body: Container(
         padding: const EdgeInsets.all(64),
@@ -221,71 +239,64 @@ class _HoloAddPageState extends State<_HoloAddPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text('x: $x'),
-            Expanded(
-                child: Slider(
-              value: x,
-              min: -500,
-              max: 500,
-              divisions: 1000,
-              label: x.toString(),
-              onChanged: (value) {
-                setState(() {
-                  x = value;
-                });
-              },
-            )),
-            Text('y: $y'),
-            Expanded(
-                child: Slider(
-              value: y,
-              min: -500,
-              max: 500,
-              divisions: 1000,
-              label: y.toString(),
-              onChanged: (value) {
-                setState(() {
-                  y = value;
-                });
-              },
-            )),
-            Text('z: $z'),
-            Expanded(
-                child: Slider(
-              value: z,
-              min: -500,
-              max: 500,
-              divisions: 1000,
-              label: z.toString(),
-              onChanged: (value) {
-                setState(() {
-                  z = value;
-                });
-              },
-            )),
-            Text('Amplitude [Pa]: $amp'),
-            Expanded(
-                child: Slider(
-              value: amp,
-              min: 0,
-              max: 20e3,
-              divisions: 1000,
-              label: amp.toString(),
-              onChanged: (value) {
-                setState(() {
-                  amp = value;
-                });
-              },
-            )),
+            Row(
+              children: <Widget>[
+                const Text('x: '),
+                Expanded(
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: TextEditingController(text: x.toString()),
+                    onChanged: (value) {
+                      x = double.tryParse(value) ?? 0;
+                    },
+                  ),
+                ),
+                const Text('y: '),
+                Expanded(
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: TextEditingController(text: y.toString()),
+                    onChanged: (value) {
+                      y = double.tryParse(value) ?? 0;
+                    },
+                  ),
+                ),
+                const Text('z: '),
+                Expanded(
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: TextEditingController(text: z.toString()),
+                    onChanged: (value) {
+                      z = double.tryParse(value) ?? 0;
+                    },
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 16),
+            Row(children: <Widget>[
+              const Text('Amplitude [Pa]: '),
+              Expanded(
+                child: TextField(
+                  keyboardType: TextInputType.number,
+                  controller: TextEditingController(text: amp.toString()),
+                  onChanged: (value) {
+                    amp = double.tryParse(value) ?? 0;
+                  },
+                ),
+              ),
+            ]),
+            const SizedBox(height: 32),
             SizedBox(
               width: double.infinity,
               child: FilledButton(
                 onPressed: () {
                   Navigator.of(context)
-                      .pop(Holo(autd3.Vector3(x, y, z), amp.pa));
+                      .pop((Holo(autd3.Vector3(x, y, z), amp.pa), true));
                 },
-                child: const Text('Add'),
+                child: widget.isEditMode
+                    ? const Text('Update')
+                    : const Text('Add'),
               ),
             ),
             const SizedBox(height: 8),
@@ -293,9 +304,11 @@ class _HoloAddPageState extends State<_HoloAddPage> {
               width: double.infinity,
               child: TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  Navigator.of(context).pop((null, false));
                 },
-                child: const Text('Cancel'),
+                child: widget.isEditMode
+                    ? const Text('Remove')
+                    : const Text('Cancel'),
               ),
             ),
           ],

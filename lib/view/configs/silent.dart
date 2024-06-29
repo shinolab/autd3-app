@@ -26,7 +26,8 @@ class _PageState extends State<SilentPage> {
       appBar: AppBar(
         title: const Text('Silencer'),
       ),
-      body: Center(
+      body: Container(
+        padding: const EdgeInsets.all(64),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[

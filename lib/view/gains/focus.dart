@@ -29,73 +29,46 @@ class _FocusPageState extends State<FocusPage> {
       appBar: AppBar(
         title: const Text('Focus'),
       ),
-      body: Center(
+      body: Container(
+        padding: const EdgeInsets.all(64),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text('x: $x'),
             Row(
               children: <Widget>[
+                const Text('x: '),
                 Expanded(
-                    child: Slider(
-                  value: x,
-                  min: -500,
-                  max: 500,
-                  divisions: 1000,
-                  label: x.toString(),
-                  onChanged: (value) {
-                    setState(() {
-                      x = value;
-                    });
-                  },
-                )),
-                IconButton(
-                    onPressed: () {
-                      setState(() {
-                        x = 0;
-                      });
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: TextEditingController(text: x.toString()),
+                    onChanged: (value) {
+                      x = double.tryParse(value) ?? 0;
                     },
-                    icon: const Icon(Icons.center_focus_strong))
+                  ),
+                ),
+                const Text('y: '),
+                Expanded(
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: TextEditingController(text: y.toString()),
+                    onChanged: (value) {
+                      y = double.tryParse(value) ?? 0;
+                    },
+                  ),
+                ),
+                const Text('z: '),
+                Expanded(
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: TextEditingController(text: z.toString()),
+                    onChanged: (value) {
+                      z = double.tryParse(value) ?? 0;
+                    },
+                  ),
+                ),
               ],
             ),
-            Text('y: $y'),
-            Row(
-              children: <Widget>[
-                Expanded(
-                    child: Slider(
-                  value: y,
-                  min: -500,
-                  max: 500,
-                  divisions: 1000,
-                  label: y.toString(),
-                  onChanged: (value) {
-                    setState(() {
-                      y = value;
-                    });
-                  },
-                )),
-                IconButton(
-                    onPressed: () {
-                      setState(() {
-                        y = 0;
-                      });
-                    },
-                    icon: const Icon(Icons.center_focus_strong))
-              ],
-            ),
-            Text('z: $z'),
-            Slider(
-              value: z,
-              min: 0,
-              max: 1000,
-              divisions: 1000,
-              label: z.toString(),
-              onChanged: (value) {
-                setState(() {
-                  z = value;
-                });
-              },
-            ),
+            const SizedBox(height: 16),
             Text('intensity: $intensity'),
             Slider(
               value: intensity.toDouble(),

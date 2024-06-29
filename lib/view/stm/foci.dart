@@ -34,9 +34,12 @@ class _FociSTMPageState extends State<FociSTMPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text('Freqency [Hz]: '),
-                    Expanded(
+                    const Text('freq [Hz]: '),
+                    // ignore: sized_box_for_whitespace
+                    Container(
+                      width: 60,
                       child: TextField(
                         keyboardType: TextInputType.number,
                         autofocus: true,
@@ -64,11 +67,16 @@ class _FociSTMPageState extends State<FociSTMPage> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
-                                          _FociSTMAddPage(focus)),
+                                          _FociSTMAddPage(focus, "Edit", true)),
                                 ).then((value) {
                                   if (value != null) {
+                                    final (c, isUpdate) = value;
                                     setState(() {
-                                      _foci[index] = value;
+                                      if (isUpdate) {
+                                        _foci[index] = c;
+                                      } else {
+                                        _foci.removeAt(index);
+                                      }
                                     });
                                   }
                                 });
@@ -98,12 +106,15 @@ class _FociSTMPageState extends State<FociSTMPage> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
-                                      _FociSTMAddPage(lastFoci)),
+                                      _FociSTMAddPage(lastFoci, "Add", false)),
                             );
                             if (value != null) {
-                              setState(() {
-                                _foci.add(value);
-                              });
+                              final (c, isUpdate) = value;
+                              if (isUpdate) {
+                                setState(() {
+                                  _foci.add(c);
+                                });
+                              }
                             }
                           },
                           child: const Icon(Icons.add))
@@ -167,16 +178,18 @@ class FociSTMCard extends StatelessWidget {
     return Card(
       child: ListTile(
         title: Text(
-            'Foci[$index]: (${p.points.pos.x}, ${p.points.pos.y}, ${p.points.pos.z})'),
+            'Foci[$index]: (${p.points.pos.x}, ${p.points.pos.y}, ${p.points.pos.z}) with intensity = ${p.intensity?.value ?? 255}'),
       ),
     );
   }
 }
 
 class _FociSTMAddPage extends StatefulWidget {
-  const _FociSTMAddPage(this.focus);
+  const _FociSTMAddPage(this.focus, this.title, this.isEditMode);
 
   final ControlPoints1 focus;
+  final String title;
+  final bool isEditMode;
 
   @override
   State<_FociSTMAddPage> createState() => _FociSTMAddPageState();
@@ -203,59 +216,50 @@ class _FociSTMAddPageState extends State<_FociSTMAddPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add focus'),
+        title: Text(widget.title),
       ),
       body: Container(
         padding: const EdgeInsets.all(64),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text('x: $x'),
-            Expanded(
-                child: Slider(
-              value: x,
-              min: -500,
-              max: 500,
-              divisions: 1000,
-              label: x.toString(),
-              onChanged: (value) {
-                setState(() {
-                  x = value;
-                });
-              },
-            )),
-            Text('y: $y'),
-            Expanded(
-                child: Slider(
-              value: y,
-              min: -500,
-              max: 500,
-              divisions: 1000,
-              label: y.toString(),
-              onChanged: (value) {
-                setState(() {
-                  y = value;
-                });
-              },
-            )),
-            Text('z: $z'),
-            Expanded(
-                child: Slider(
-              value: z,
-              min: -500,
-              max: 500,
-              divisions: 1000,
-              label: z.toString(),
-              onChanged: (value) {
-                setState(() {
-                  z = value;
-                });
-              },
-            )),
+            Row(
+              children: <Widget>[
+                const Text('x: '),
+                Expanded(
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: TextEditingController(text: x.toString()),
+                    onChanged: (value) {
+                      x = double.tryParse(value) ?? 0;
+                    },
+                  ),
+                ),
+                const Text('y: '),
+                Expanded(
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: TextEditingController(text: y.toString()),
+                    onChanged: (value) {
+                      y = double.tryParse(value) ?? 0;
+                    },
+                  ),
+                ),
+                const Text('z: '),
+                Expanded(
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: TextEditingController(text: z.toString()),
+                    onChanged: (value) {
+                      z = double.tryParse(value) ?? 0;
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
             Text('Intensity: $intensity'),
-            Expanded(
-                child: Slider(
+            Slider(
               value: intensity.toDouble(),
               min: 0,
               max: 255,
@@ -266,17 +270,21 @@ class _FociSTMAddPageState extends State<_FociSTMAddPage> {
                   intensity = value.toInt();
                 });
               },
-            )),
+            ),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
               child: FilledButton(
                 onPressed: () {
-                  Navigator.of(context).pop(ControlPoints1(
-                      ControlPoint(autd3.Vector3(x, y, z)),
-                      intensity: EmitIntensity(intensity)));
+                  Navigator.of(context).pop((
+                    ControlPoints1(ControlPoint(autd3.Vector3(x, y, z)),
+                        intensity: EmitIntensity(intensity)),
+                    true
+                  ));
                 },
-                child: const Text('Add'),
+                child: widget.isEditMode
+                    ? const Text('Update')
+                    : const Text('Add'),
               ),
             ),
             const SizedBox(height: 8),
@@ -284,9 +292,11 @@ class _FociSTMAddPageState extends State<_FociSTMAddPage> {
               width: double.infinity,
               child: TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  Navigator.of(context).pop((null, false));
                 },
-                child: const Text('Cancel'),
+                child: widget.isEditMode
+                    ? const Text('Remove')
+                    : const Text('Cancel'),
               ),
             ),
           ],

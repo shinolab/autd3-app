@@ -26,23 +26,28 @@ class _SinePageState extends State<SinePage> {
       appBar: AppBar(
         title: const Text('Sine'),
       ),
-      body: Center(
+      body: Container(
+        padding: const EdgeInsets.all(64),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text('freq: $freq'),
-            Slider(
-              value: freq.toDouble(),
-              min: 0,
-              max: 2000,
-              divisions: 2000,
-              label: freq.toString(),
-              onChanged: (value) {
-                setState(() {
-                  freq = value.toInt();
-                });
-              },
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                const Text('freq [Hz]: '),
+                // ignore: sized_box_for_whitespace
+                Container(
+                    width: 60,
+                    child: TextField(
+                      keyboardType: TextInputType.number,
+                      controller: TextEditingController(text: freq.toString()),
+                      onChanged: (value) {
+                        freq = int.tryParse(value) ?? 0;
+                      },
+                    )),
+              ],
             ),
+            const SizedBox(height: 16),
             Text('intensity: $intensity'),
             Slider(
               value: intensity.toDouble(),

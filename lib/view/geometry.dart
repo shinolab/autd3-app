@@ -62,12 +62,13 @@ class _GeometryPageState extends State<GeometryPage> {
                                   )),
                         ).then((value) {
                           if (value != null) {
+                            final (g, isUpdate) = value;
                             setState(() {
-                              widget.settings.geometry[index] = value;
-                            });
-                          } else {
-                            setState(() {
-                              widget.settings.geometry.removeAt(index);
+                              if (isUpdate) {
+                                widget.settings.geometry[index] = g;
+                              } else {
+                                widget.settings.geometry.removeAt(index);
+                              }
                             });
                           }
                         });
@@ -102,9 +103,12 @@ class _GeometryPageState extends State<GeometryPage> {
                               )),
                     );
                     if (value != null) {
-                      setState(() {
-                        widget.settings.geometry.add(value);
-                      });
+                      final (g, isUpdate) = value;
+                      if (isUpdate) {
+                        setState(() {
+                          widget.settings.geometry.add(g);
+                        });
+                      }
                     }
                   },
                   child: const Icon(Icons.add))
@@ -424,7 +428,7 @@ class _GeometryConfigPageState extends State<_GeometryConfigPage> {
               width: double.infinity,
               child: FilledButton(
                 onPressed: () {
-                  Navigator.of(context).pop(geometry);
+                  Navigator.of(context).pop((geometry, true));
                 },
                 child: widget.isEditMode
                     ? const Text('Update')
@@ -436,7 +440,7 @@ class _GeometryConfigPageState extends State<_GeometryConfigPage> {
               width: double.infinity,
               child: TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop(null);
+                  Navigator.of(context).pop((null, false));
                 },
                 child: widget.isEditMode
                     ? const Text('Remove')

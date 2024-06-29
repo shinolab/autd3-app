@@ -32,131 +32,88 @@ class _BesselPageState extends State<BesselPage> {
       appBar: AppBar(
         title: const Text('Bessel'),
       ),
-      body: Center(
+      body: Container(
+        padding: const EdgeInsets.all(64),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text('x: $x'),
             Row(
               children: <Widget>[
+                const Text('x: '),
                 Expanded(
-                    child: Slider(
-                  value: x,
-                  min: -500,
-                  max: 500,
-                  divisions: 1000,
-                  label: x.toString(),
-                  onChanged: (value) {
-                    setState(() {
-                      x = value;
-                    });
-                  },
-                )),
-                IconButton(
-                    onPressed: () {
-                      setState(() {
-                        x = 0;
-                      });
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: TextEditingController(text: x.toString()),
+                    onChanged: (value) {
+                      x = double.tryParse(value) ?? 0;
                     },
-                    icon: const Icon(Icons.center_focus_strong))
+                  ),
+                ),
+                const Text('y: '),
+                Expanded(
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: TextEditingController(text: y.toString()),
+                    onChanged: (value) {
+                      y = double.tryParse(value) ?? 0;
+                    },
+                  ),
+                ),
+                const Text('z: '),
+                Expanded(
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: TextEditingController(text: z.toString()),
+                    onChanged: (value) {
+                      z = double.tryParse(value) ?? 0;
+                    },
+                  ),
+                ),
               ],
             ),
-            Text('y: $y'),
+            const SizedBox(height: 16),
             Row(
               children: <Widget>[
+                const Text('nx: '),
                 Expanded(
-                    child: Slider(
-                  value: y,
-                  min: -500,
-                  max: 500,
-                  divisions: 1000,
-                  label: y.toString(),
-                  onChanged: (value) {
-                    setState(() {
-                      y = value;
-                    });
-                  },
-                )),
-                IconButton(
-                    onPressed: () {
-                      setState(() {
-                        y = 0;
-                      });
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: TextEditingController(text: nx.toString()),
+                    onChanged: (value) {
+                      nx = double.tryParse(value) ?? 0;
                     },
-                    icon: const Icon(Icons.center_focus_strong))
+                  ),
+                ),
+                const Text('ny: '),
+                Expanded(
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: TextEditingController(text: ny.toString()),
+                    onChanged: (value) {
+                      ny = double.tryParse(value) ?? 0;
+                    },
+                  ),
+                ),
+                const Text('nz: '),
+                Expanded(
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: TextEditingController(text: nz.toString()),
+                    onChanged: (value) {
+                      nz = double.tryParse(value) ?? 0;
+                    },
+                  ),
+                ),
               ],
             ),
-            Text('z: $z'),
-            Row(
-              children: <Widget>[
-                Expanded(
-                    child: Slider(
-                  value: z,
-                  min: -500,
-                  max: 500,
-                  divisions: 1000,
-                  label: z.toString(),
-                  onChanged: (value) {
-                    setState(() {
-                      z = value;
-                    });
-                  },
-                )),
-                IconButton(
-                    onPressed: () {
-                      setState(() {
-                        z = 0;
-                      });
-                    },
-                    icon: const Icon(Icons.center_focus_strong))
-              ],
-            ),
-            Text('nx: $nx'),
-            Slider(
-              value: nx,
-              min: 0,
-              max: 1,
-              divisions: 100,
-              label: nx.toString(),
-              onChanged: (value) {
-                setState(() {
-                  nx = value;
-                });
-              },
-            ),
-            Text('ny: $ny'),
-            Slider(
-              value: ny,
-              min: 0,
-              max: 1,
-              divisions: 100,
-              label: ny.toString(),
-              onChanged: (value) {
-                setState(() {
-                  ny = value;
-                });
-              },
-            ),
-            Text('nz: $nz'),
-            Slider(
-              value: nz,
-              min: 0,
-              max: 1,
-              divisions: 100,
-              label: nz.toString(),
-              onChanged: (value) {
-                setState(() {
-                  nz = value;
-                });
-              },
-            ),
-            Text('theta: $theta'),
+            const SizedBox(height: 16),
+            Text('theta: ${theta.toInt()} deg'),
             Slider(
               value: theta,
               min: 0,
-              max: 360,
-              divisions: 360,
-              label: theta.toString(),
+              max: 90,
+              divisions: 90,
+              label: theta.toInt().toString(),
               onChanged: (value) {
                 setState(() {
                   theta = value;

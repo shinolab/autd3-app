@@ -28,49 +28,46 @@ class _PlanePageState extends State<PlanePage> {
       appBar: AppBar(
         title: const Text('Plane'),
       ),
-      body: Center(
+      body: Container(
+        padding: const EdgeInsets.all(64),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text('nx: $nx'),
-            Slider(
-              value: nx,
-              min: 0,
-              max: 1,
-              divisions: 100,
-              label: nx.toString(),
-              onChanged: (value) {
-                setState(() {
-                  nx = value;
-                });
-              },
+            Row(
+              children: <Widget>[
+                const Text('nx: '),
+                Expanded(
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: TextEditingController(text: nx.toString()),
+                    onChanged: (value) {
+                      nx = double.tryParse(value) ?? 0;
+                    },
+                  ),
+                ),
+                const Text('ny: '),
+                Expanded(
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: TextEditingController(text: ny.toString()),
+                    onChanged: (value) {
+                      ny = double.tryParse(value) ?? 0;
+                    },
+                  ),
+                ),
+                const Text('nz: '),
+                Expanded(
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: TextEditingController(text: nz.toString()),
+                    onChanged: (value) {
+                      nz = double.tryParse(value) ?? 0;
+                    },
+                  ),
+                ),
+              ],
             ),
-            Text('ny: $ny'),
-            Slider(
-              value: ny,
-              min: 0,
-              max: 1,
-              divisions: 100,
-              label: ny.toString(),
-              onChanged: (value) {
-                setState(() {
-                  ny = value;
-                });
-              },
-            ),
-            Text('nz: $nz'),
-            Slider(
-              value: nz,
-              min: 0,
-              max: 1,
-              divisions: 100,
-              label: nz.toString(),
-              onChanged: (value) {
-                setState(() {
-                  nz = value;
-                });
-              },
-            ),
+            const SizedBox(height: 16),
             Text('intensity: $intensity'),
             Slider(
               value: intensity.toDouble(),
