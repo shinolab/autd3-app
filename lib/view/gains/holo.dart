@@ -15,7 +15,7 @@ class HoloPage extends StatefulWidget {
 }
 
 // ignore: constant_identifier_names
-enum HoloType { Greedy, GS, GSPAT, Naive, LM, SDP }
+enum HoloType { Greedy, GS, GSPAT, Naive, LM }
 
 class _HoloPageState extends State<HoloPage> {
   bool isSending = false;
@@ -144,8 +144,6 @@ class _HoloPageState extends State<HoloPage> {
                       await widget.controller.send(autd3.Naive(_foci));
                     case HoloType.LM:
                       await widget.controller.send(autd3.LM(_foci));
-                    case HoloType.SDP:
-                      await widget.controller.send(autd3.SDP(_foci));
                   }
                 } catch (e) {
                   if (!context.mounted) {

@@ -135,7 +135,10 @@ class _AppPageState extends State<AppPage> {
                                   try {
                                     await widget.controller.send(Null());
                                     await widget.controller.send(
-                                        Silencer.fromCompletionSteps(10, 40));
+                                        Silencer.fromCompletionTime(
+                                            const Duration(microseconds: 250),
+                                            const Duration(
+                                                microseconds: 1000)));
                                   } catch (e) {
                                     if (!context.mounted) {
                                       return;

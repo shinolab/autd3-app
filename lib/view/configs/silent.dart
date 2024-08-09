@@ -68,8 +68,10 @@ class _PageState extends State<SilentPage> {
                   isSending = true;
                 });
                 try {
-                  await widget.controller
-                      .send(Silencer.fromCompletionSteps(intensity, phase));
+                  await widget.controller.send(Silencer.fromCompletionTime(
+                    Duration(microseconds: 25 * intensity),
+                    Duration(microseconds: 25 * phase),
+                  ));
                 } catch (e) {
                   if (!context.mounted) {
                     return;
