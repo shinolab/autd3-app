@@ -21,8 +21,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "v27.0.0"
-      resolved-ref: "773b479549ce8a93da5910985e92a34f6d6eabee"
+      ref: "v28.0.1"
+      resolved-ref: "56d1a10a4832012bcc010b953efd3774ae8cc6d7"
       url: "https://github.com/shinolab/autd3-dart.git"
     source: git
     version: "27.0.0"
