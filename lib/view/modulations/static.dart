@@ -53,7 +53,7 @@ class _StaticPageState extends State<StaticPage> {
                   isSending = true;
                 });
                 try {
-                  await widget.controller.send(Static.withIntensity(intensity));
+                  await widget.controller.send(Static(intensity: intensity));
                 } catch (e) {
                   if (!context.mounted) {
                     return;
@@ -62,7 +62,7 @@ class _StaticPageState extends State<StaticPage> {
                     SnackBar(
                       content: Text(e.toString(),
                           style: const TextStyle(color: Colors.white)),
-                      backgroundColor: Colors.redAccent.withOpacity(0.8),
+                      backgroundColor: Colors.redAccent.withValues(alpha: 0.8),
                       behavior: SnackBarBehavior.floating,
                       elevation: 4.0,
                       dismissDirection: DismissDirection.horizontal,

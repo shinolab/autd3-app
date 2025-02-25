@@ -1,3 +1,4 @@
+import 'package:autd3/datagram/gain/focus.dart';
 import 'package:autd3/utils/emit_intensity.dart';
 import 'package:flutter/material.dart';
 
@@ -95,8 +96,8 @@ class _FocusPageState extends State<FocusPage> {
                 });
                 try {
                   await widget.controller.send(autd3.Focus(
-                    autd3.Vector3(x, y, z),
-                    intensity: EmitIntensity(intensity),
+                    pos: autd3.Point3(x, y, z),
+                    option: FocusOption(intensity: EmitIntensity(intensity)),
                   ));
                 } catch (e) {
                   if (!context.mounted) {
@@ -106,7 +107,7 @@ class _FocusPageState extends State<FocusPage> {
                     SnackBar(
                       content: Text(e.toString(),
                           style: const TextStyle(color: Colors.white)),
-                      backgroundColor: Colors.redAccent.withOpacity(0.8),
+                      backgroundColor: Colors.redAccent.withValues(alpha: 0.8),
                       behavior: SnackBarBehavior.floating,
                       elevation: 4.0,
                       dismissDirection: DismissDirection.horizontal,

@@ -124,24 +124,25 @@ class _GeometryPageState extends State<GeometryPage> {
                     _connecting = true;
                   });
                   await widget.settings.save('settings.json');
-                  Controller.builder(widget.settings.geometry.map((d) => AUTD3(
-                          Vector3(d.x, d.y, d.z),
+                  Controller.open(
+                      widget.settings.geometry.map((d) => AUTD3(
+                          pos: Point3(d.x, d.y, d.z),
                           rot: Quaternion.axisAngle(
                                   Vector3(0, 0, 1), d.rz1 / 180 * pi) *
                               Quaternion.axisAngle(
                                   Vector3(0, 1, 0), d.ry / 180 * pi) *
                               Quaternion.axisAngle(
-                                  Vector3(0, 0, 1), d.rz2 / 180 * pi))))
-                      .open(ClientChannel(
-                    widget.settings.ip,
-                    port: widget.settings.port,
-                    options: const ChannelOptions(
-                      credentials: ChannelCredentials.insecure(),
-                      connectTimeout: Duration(seconds: 10),
-                    ),
-                  ))
-                      .then((controller) {
+                                  Vector3(0, 0, 1), d.rz2 / 180 * pi))),
+                      ClientChannel(
+                        widget.settings.ip,
+                        port: widget.settings.port,
+                        options: const ChannelOptions(
+                          credentials: ChannelCredentials.insecure(),
+                          connectTimeout: Duration(seconds: 10),
+                        ),
+                      )).then((controller) {
                     final completer = Completer();
+                    if (!context.mounted) return;
                     final result = Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
@@ -156,11 +157,13 @@ class _GeometryPageState extends State<GeometryPage> {
                     setState(() {
                       _connecting = false;
                     });
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('Failed to connect to the server: $e',
                             style: const TextStyle(color: Colors.white)),
-                        backgroundColor: Colors.redAccent.withOpacity(0.8),
+                        backgroundColor:
+                            Colors.redAccent.withValues(alpha: 0.8),
                         duration: const Duration(days: 365),
                         behavior: SnackBarBehavior.floating,
                         elevation: 4.0,

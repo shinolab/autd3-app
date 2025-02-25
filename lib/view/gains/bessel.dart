@@ -145,10 +145,10 @@ class _BesselPageState extends State<BesselPage> {
                 });
                 try {
                   await widget.controller.send(Bessel(
-                    Vector3(x, y, z),
-                    Vector3(nx, ny, nz),
-                    theta.deg,
-                    intensity: EmitIntensity(intensity),
+                    pos: Point3(x, y, z),
+                    dir: UnitVector3(Vector3(nx, ny, nz)),
+                    theta: theta.deg,
+                    option: BesselOption(intensity: EmitIntensity(intensity)),
                   ));
                 } catch (e) {
                   if (!context.mounted) {
@@ -158,7 +158,7 @@ class _BesselPageState extends State<BesselPage> {
                     SnackBar(
                       content: Text(e.toString(),
                           style: const TextStyle(color: Colors.white)),
-                      backgroundColor: Colors.redAccent.withOpacity(0.8),
+                      backgroundColor: Colors.redAccent.withValues(alpha: 0.8),
                       behavior: SnackBarBehavior.floating,
                       elevation: 4.0,
                       dismissDirection: DismissDirection.horizontal,

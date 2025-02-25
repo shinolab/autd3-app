@@ -5,8 +5,8 @@ import '../settings.dart';
 import 'configs/silent.dart';
 
 class ConfigPage extends StatefulWidget {
-  const ConfigPage({Key? key, required this.controller, required this.settings})
-      : super(key: key);
+  const ConfigPage(
+      {super.key, required this.controller, required this.settings});
 
   final Controller controller;
   final Settings settings;

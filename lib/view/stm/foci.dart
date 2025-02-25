@@ -20,7 +20,7 @@ class _FociSTMPageState extends State<FociSTMPage> {
   bool isSending = false;
 
   double freq = 1;
-  final List<ControlPoints1> _foci = [];
+  final List<ControlPoints> _foci = [];
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +82,7 @@ class _FociSTMPageState extends State<FociSTMPage> {
                                 });
                               },
                               child: Dismissible(
-                                key: ValueKey<ControlPoints1>(focus),
+                                key: ValueKey<ControlPoints>(focus),
                                 onDismissed: (direction) {
                                   setState(() {
                                     _foci.removeAt(index);
@@ -98,9 +98,11 @@ class _FociSTMPageState extends State<FociSTMPage> {
                       FilledButton(
                           onPressed: () async {
                             final lastFoci = _foci.isEmpty
-                                ? ControlPoints1(
-                                    ControlPoint(autd3.Vector3(90, 70, 150)),
-                                    intensity: EmitIntensity(255))
+                                ? ControlPoints([
+                                    ControlPoint(
+                                        pos: autd3.Point3(90, 70, 150),
+                                        offset: null)
+                                  ], intensity: EmitIntensity(255))
                                 : _foci[_foci.length - 1];
                             final value = await Navigator.push(
                               context,
@@ -131,7 +133,7 @@ class _FociSTMPageState extends State<FociSTMPage> {
                 });
                 try {
                   await widget.controller
-                      .send(autd3.FociSTM1.fromFreq(freq.Hz, _foci));
+                      .send(autd3.FociSTM(foci: _foci, config: freq.Hz));
                 } catch (e) {
                   if (!context.mounted) {
                     return;
@@ -140,7 +142,7 @@ class _FociSTMPageState extends State<FociSTMPage> {
                     SnackBar(
                       content: Text(e.toString(),
                           style: const TextStyle(color: Colors.white)),
-                      backgroundColor: Colors.redAccent.withOpacity(0.8),
+                      backgroundColor: Colors.redAccent.withValues(alpha: 0.8),
                       behavior: SnackBarBehavior.floating,
                       elevation: 4.0,
                       dismissDirection: DismissDirection.horizontal,
@@ -171,14 +173,14 @@ class FociSTMCard extends StatelessWidget {
   const FociSTMCard({super.key, required this.index, required this.p});
 
   final int index;
-  final ControlPoints1 p;
+  final ControlPoints p;
 
   @override
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
         title: Text(
-            'Foci[$index]: (${p.points.pos.x}, ${p.points.pos.y}, ${p.points.pos.z}) with intensity = ${p.intensity?.value ?? 255}'),
+            'Foci[$index]: (${p.points[0].pos.x}, ${p.points[0].pos.y}, ${p.points[0].pos.z}) with intensity = ${p.intensity?.value ?? 255}'),
       ),
     );
   }
@@ -187,7 +189,7 @@ class FociSTMCard extends StatelessWidget {
 class _FociSTMAddPage extends StatefulWidget {
   const _FociSTMAddPage(this.focus, this.title, this.isEditMode);
 
-  final ControlPoints1 focus;
+  final ControlPoints focus;
   final String title;
   final bool isEditMode;
 
@@ -206,9 +208,9 @@ class _FociSTMAddPageState extends State<_FociSTMAddPage> {
   @override
   void initState() {
     super.initState();
-    x = widget.focus.points.pos.x;
-    y = widget.focus.points.pos.y;
-    z = widget.focus.points.pos.z;
+    x = widget.focus.points[0].pos.x;
+    y = widget.focus.points[0].pos.y;
+    z = widget.focus.points[0].pos.z;
     intensity = widget.focus.intensity?.value ?? 255;
   }
 
@@ -277,7 +279,7 @@ class _FociSTMAddPageState extends State<_FociSTMAddPage> {
               child: FilledButton(
                 onPressed: () {
                   Navigator.of(context).pop((
-                    ControlPoints1(ControlPoint(autd3.Vector3(x, y, z)),
+                    ControlPoints([ControlPoint(pos: autd3.Point3(x, y, z))],
                         intensity: EmitIntensity(intensity)),
                     true
                   ));

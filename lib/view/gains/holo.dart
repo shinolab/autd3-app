@@ -20,7 +20,7 @@ enum HoloType { Greedy, GS, GSPAT, Naive, LM }
 class _HoloPageState extends State<HoloPage> {
   bool isSending = false;
 
-  final List<Holo> _foci = [];
+  final List<(autd3.Point3, Amplitude)> _foci = [];
   HoloType selectedAlgorighm = HoloType.GSPAT;
 
   @override
@@ -87,7 +87,7 @@ class _HoloPageState extends State<HoloPage> {
                                 });
                               },
                               child: Dismissible(
-                                key: ValueKey<Holo>(focus),
+                                key: ValueKey<(autd3.Point3, Amplitude)>(focus),
                                 onDismissed: (direction) {
                                   setState(() {
                                     _foci.removeAt(index);
@@ -103,7 +103,7 @@ class _HoloPageState extends State<HoloPage> {
                       FilledButton(
                           onPressed: () async {
                             final lastFoci = _foci.isEmpty
-                                ? Holo(autd3.Vector3(90, 70, 150), 5e3.pa)
+                                ? (autd3.Point3(90, 70, 150), 5e3.pa)
                                 : _foci[_foci.length - 1];
                             final value = await Navigator.push(
                               context,
@@ -135,15 +135,20 @@ class _HoloPageState extends State<HoloPage> {
                 try {
                   switch (selectedAlgorighm) {
                     case HoloType.Greedy:
-                      await widget.controller.send(autd3.Greedy(_foci));
+                      await widget.controller.send(
+                          autd3.Greedy(foci: _foci, option: GreedyOption()));
                     case HoloType.GS:
-                      await widget.controller.send(autd3.GS(_foci));
+                      await widget.controller
+                          .send(autd3.GS(foci: _foci, option: GSOption()));
                     case HoloType.GSPAT:
-                      await widget.controller.send(autd3.GSPAT(_foci));
+                      await widget.controller.send(
+                          autd3.GSPAT(foci: _foci, option: GSPATOption()));
                     case HoloType.Naive:
-                      await widget.controller.send(autd3.Naive(_foci));
+                      await widget.controller.send(
+                          autd3.Naive(foci: _foci, option: NaiveOption()));
                     case HoloType.LM:
-                      await widget.controller.send(autd3.LM(_foci));
+                      await widget.controller
+                          .send(autd3.LM(foci: _foci, option: LMOption()));
                   }
                 } catch (e) {
                   if (!context.mounted) {
@@ -153,7 +158,7 @@ class _HoloPageState extends State<HoloPage> {
                     SnackBar(
                       content: Text(e.toString(),
                           style: const TextStyle(color: Colors.white)),
-                      backgroundColor: Colors.redAccent.withOpacity(0.8),
+                      backgroundColor: Colors.redAccent.withValues(alpha: 0.8),
                       behavior: SnackBarBehavior.floating,
                       elevation: 4.0,
                       dismissDirection: DismissDirection.horizontal,
@@ -184,14 +189,14 @@ class HoloCard extends StatelessWidget {
   const HoloCard({super.key, required this.index, required this.holo});
 
   final int index;
-  final Holo holo;
+  final (autd3.Point3, Amplitude) holo;
 
   @override
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
         title: Text(
-            'Foci[$index]: ${holo.amp.pa} Pa @ (${holo.pos.x}, ${holo.pos.y}, ${holo.pos.z})'),
+            'Foci[$index]: ${holo.$2.pa} Pa @ (${holo.$1.x}, ${holo.$1.y}, ${holo.$1.z})'),
       ),
     );
   }
@@ -200,7 +205,7 @@ class HoloCard extends StatelessWidget {
 class _HoloAddPage extends StatefulWidget {
   const _HoloAddPage(this.focus, this.title, this.isEditMode);
 
-  final Holo focus;
+  final (autd3.Point3, Amplitude) focus;
   final String title;
   final bool isEditMode;
 
@@ -219,10 +224,10 @@ class _HoloAddPageState extends State<_HoloAddPage> {
   @override
   void initState() {
     super.initState();
-    x = widget.focus.pos.x;
-    y = widget.focus.pos.y;
-    z = widget.focus.pos.z;
-    amp = widget.focus.amp.pa;
+    x = widget.focus.$1.x;
+    y = widget.focus.$1.y;
+    z = widget.focus.$1.z;
+    amp = widget.focus.$2.pa;
   }
 
   @override
@@ -290,7 +295,7 @@ class _HoloAddPageState extends State<_HoloAddPage> {
               child: FilledButton(
                 onPressed: () {
                   Navigator.of(context)
-                      .pop((Holo(autd3.Vector3(x, y, z), amp.pa), true));
+                      .pop(((autd3.Point3(x, y, z), amp.pa), true));
                 },
                 child: widget.isEditMode
                     ? const Text('Update')

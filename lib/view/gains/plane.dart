@@ -93,9 +93,9 @@ class _PlanePageState extends State<PlanePage> {
                 });
                 try {
                   await widget.controller.send(Plane(
-                    Vector3(nx, ny, nz),
-                    intensity: EmitIntensity(intensity),
-                  ));
+                      dir: UnitVector3(Vector3(nx, ny, nz)),
+                      option:
+                          PlaneOption(intensity: EmitIntensity(intensity))));
                 } catch (e) {
                   if (!context.mounted) {
                     return;
@@ -104,7 +104,7 @@ class _PlanePageState extends State<PlanePage> {
                     SnackBar(
                       content: Text(e.toString(),
                           style: const TextStyle(color: Colors.white)),
-                      backgroundColor: Colors.redAccent.withOpacity(0.8),
+                      backgroundColor: Colors.redAccent.withValues(alpha: 0.8),
                       behavior: SnackBarBehavior.floating,
                       elevation: 4.0,
                       dismissDirection: DismissDirection.horizontal,

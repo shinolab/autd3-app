@@ -99,12 +99,13 @@ class _SquarePageState extends State<SquarePage> {
                   isSending = true;
                 });
                 try {
-                  await widget.controller.send(Square.create(
-                    freq.Hz,
-                    low: low,
-                    high: high,
-                    duty: duty,
-                  ));
+                  await widget.controller.send(Square(
+                      freq: freq.Hz,
+                      option: SquareOption(
+                        low: low,
+                        high: high,
+                        duty: duty,
+                      )));
                 } catch (e) {
                   if (!context.mounted) {
                     return;
@@ -113,7 +114,7 @@ class _SquarePageState extends State<SquarePage> {
                     SnackBar(
                       content: Text(e.toString(),
                           style: const TextStyle(color: Colors.white)),
-                      backgroundColor: Colors.redAccent.withOpacity(0.8),
+                      backgroundColor: Colors.redAccent.withValues(alpha: 0.8),
                       behavior: SnackBarBehavior.floating,
                       elevation: 4.0,
                       dismissDirection: DismissDirection.horizontal,

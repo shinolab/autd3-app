@@ -18,7 +18,7 @@ class _SinePageState extends State<SinePage> {
 
   int freq = 150;
   int intensity = 255;
-  int offset = 127;
+  int offset = 128;
 
   @override
   Widget build(BuildContext context) {
@@ -85,11 +85,12 @@ class _SinePageState extends State<SinePage> {
                   isSending = true;
                 });
                 try {
-                  await widget.controller.send(Sine.create(
-                    freq.Hz,
-                    intensity: intensity,
-                    offset: offset,
-                  ));
+                  await widget.controller.send(Sine(
+                      freq: freq.Hz,
+                      option: SineOption(
+                        intensity: intensity,
+                        offset: offset,
+                      )));
                 } catch (e) {
                   if (!context.mounted) {
                     return;
@@ -98,7 +99,7 @@ class _SinePageState extends State<SinePage> {
                     SnackBar(
                       content: Text(e.toString(),
                           style: const TextStyle(color: Colors.white)),
-                      backgroundColor: Colors.redAccent.withOpacity(0.8),
+                      backgroundColor: Colors.redAccent.withValues(alpha: 0.8),
                       behavior: SnackBarBehavior.floating,
                       elevation: 4.0,
                       dismissDirection: DismissDirection.horizontal,

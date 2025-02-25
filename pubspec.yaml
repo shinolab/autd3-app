@@ -1,8 +1,8 @@
 name: autd3_gui_app
-description: "A new Flutter project."
+description: "A simple Flutter app for autd3"
 publish_to: 'none'
 
-version: 28.0.1
+version: 30.0.1
 
 environment:
   sdk: '>=3.4.3 <4.0.0'
@@ -14,7 +14,7 @@ dependencies:
   autd3:
     git:
       url: https://github.com/shinolab/autd3-dart.git
-      ref: v28.0.1
+      ref: v30.0.1
   path_provider: ^2.1.3
   path: ^1.9.0
   grpc: ^4.0.0
@@ -23,7 +23,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  flutter_lints: ^4.0.0
+  flutter_lints: ^5.0.0
 
 flutter:
   uses-material-design: true

@@ -45,7 +45,7 @@ class _AppPageState extends State<AppPage> {
   Widget build(BuildContext context) {
     return PopScope(
         canPop: false,
-        onPopInvoked: (bool didPop) async {
+        onPopInvokedWithResult: (bool didPop, __) async {
           if (didPop) {
             return;
           }
@@ -134,11 +134,10 @@ class _AppPageState extends State<AppPage> {
                                   });
                                   try {
                                     await widget.controller.send(Null());
-                                    await widget.controller.send(
-                                        Silencer.fromCompletionTime(
-                                            const Duration(microseconds: 250),
-                                            const Duration(
-                                                microseconds: 1000)));
+                                    await widget.controller.send(Silencer(
+                                        config: FixedCompletionSteps(
+                                            intensity: 10, phase: 40),
+                                        target: SilencerTarget.Intensity));
                                   } catch (e) {
                                     if (!context.mounted) {
                                       return;
@@ -148,8 +147,8 @@ class _AppPageState extends State<AppPage> {
                                         content: Text(e.toString(),
                                             style: const TextStyle(
                                                 color: Colors.white)),
-                                        backgroundColor:
-                                            Colors.redAccent.withOpacity(0.8),
+                                        backgroundColor: Colors.redAccent
+                                            .withValues(alpha: 0.8),
                                         behavior: SnackBarBehavior.floating,
                                         elevation: 4.0,
                                         dismissDirection:

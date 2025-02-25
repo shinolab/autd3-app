@@ -68,10 +68,10 @@ class _PageState extends State<SilentPage> {
                   isSending = true;
                 });
                 try {
-                  await widget.controller.send(Silencer.fromCompletionTime(
-                    Duration(microseconds: 25 * intensity),
-                    Duration(microseconds: 25 * phase),
-                  ));
+                  await widget.controller.send(Silencer(
+                      config: FixedCompletionSteps(
+                          intensity: intensity, phase: phase),
+                      target: SilencerTarget.Intensity));
                 } catch (e) {
                   if (!context.mounted) {
                     return;
@@ -80,7 +80,7 @@ class _PageState extends State<SilentPage> {
                     SnackBar(
                       content: Text(e.toString(),
                           style: const TextStyle(color: Colors.white)),
-                      backgroundColor: Colors.redAccent.withOpacity(0.8),
+                      backgroundColor: Colors.redAccent.withValues(alpha: 0.8),
                       behavior: SnackBarBehavior.floating,
                       elevation: 4.0,
                       dismissDirection: DismissDirection.horizontal,
