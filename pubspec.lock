@@ -21,11 +21,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "v30.0.1"
-      resolved-ref: "44a263e6348e3b07f4559cde9085de851b384b58"
+      ref: "v32.0.1"
+      resolved-ref: "05acd013d74e6a2c1c5c5e5baea0c6da3c0111b7"
       url: "https://github.com/shinolab/autd3-dart.git"
     source: git
-    version: "30.0.1"
+    version: "32.0.1"
   boolean_selector:
     dependency: transitive
     description:

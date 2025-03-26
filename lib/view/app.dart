@@ -136,8 +136,7 @@ class _AppPageState extends State<AppPage> {
                                     await widget.controller.send(Null());
                                     await widget.controller.send(Silencer(
                                         config: FixedCompletionSteps(
-                                            intensity: 10, phase: 40),
-                                        target: SilencerTarget.Intensity));
+                                            intensity: 10, phase: 40)));
                                   } catch (e) {
                                     if (!context.mounted) {
                                       return;

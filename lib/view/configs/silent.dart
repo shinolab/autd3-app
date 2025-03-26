@@ -70,8 +70,7 @@ class _PageState extends State<SilentPage> {
                 try {
                   await widget.controller.send(Silencer(
                       config: FixedCompletionSteps(
-                          intensity: intensity, phase: phase),
-                      target: SilencerTarget.Intensity));
+                          intensity: intensity, phase: phase)));
                 } catch (e) {
                   if (!context.mounted) {
                     return;
